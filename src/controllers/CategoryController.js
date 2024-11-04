@@ -11,16 +11,21 @@ export const getAllCategories = async (req, res) => {
     }
 };
 
-export const createCategory = async (req, res) => {
-    const { name, backgroundColor, iconUrl } = req.body;
+export const createCategory = async (req, res, next) => {
     try {
+        const { name, backgroundColor, iconUrl } = req.body;
+        if (!name || !backgroundColor || !iconUrl) {
+            return res.status(400).json({ message: 'Trūksta būtino lauko' });
+        }
         const newCategory = new Category({ name, backgroundColor, iconUrl });
         await newCategory.save();
         res.status(201).json(newCategory);
     } catch (error) {
-        res.status(500).json({ message: 'Error creating category', error });
+        console.error('Klaida kuriant kategoriją:', error.message);
+        next(error); 
     }
 };
+
 
 export const updateCategory = async (req, res) => {
     try {

@@ -1,23 +1,20 @@
-// app.js
+import cors from 'cors';
 import express from 'express';
-import connectDB from './config/db.js';
+import errorHandler from './middlewares/errorHandler.js';
+import bookingRoutes from './routes/bookingRoutes.js';
+import businessRoutes from './routes/businessRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
-import companyRoutes from './routes/companyRoutes.js';
-import orderRoutes from './routes/orderRoutes.js';
 
 const app = express();
-const PORT = process.env.PORT || 5000;
-
-// Connect to the database
-connectDB();
 
 app.use(express.json());
+app.use(cors());
 
-// Route handlers
+app.use('/api/businesses', businessRoutes);
 app.use('/api/categories', categoryRoutes);
-app.use('/api/companies', companyRoutes);
-app.use('/api/orders', orderRoutes);
+app.use('/api/bookings', bookingRoutes);
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+app.use(errorHandler);
+
+// Eksportuokite `app`, bet nepaleiskite serverio
+export default app;
