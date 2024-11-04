@@ -2,14 +2,13 @@
 import mongoose from 'mongoose';
 
 const companySchema = new mongoose.Schema({
-    name: { type: String, required: true },
-    description: { type: String },
-    address: { type: String },
-    category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
-    contactPerson: { type: String },
-    email: { type: String },
-    photos: [{ type: String }]
+  name: { type: String, required: true },
+  description: { type: String, required: true },
+  address: { type: String, required: true },
+  category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
+  contactPerson: { type: String, required: true },
+  email: { type: String, required: true },
+  images: [{ type: String }],
 });
 
-const Company = mongoose.model('Company', companySchema);
-export default Company;
+export default mongoose.model('Company', companySchema);

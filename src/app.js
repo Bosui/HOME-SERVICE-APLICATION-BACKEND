@@ -1,15 +1,23 @@
-// Failas: src/app.js
+// app.js
 import express from 'express';
-import router from './routes/routes.js'; // Patikrinkite, ar kelias ir importas teisingi
+import connectDB from './config/db.js';
+import categoryRoutes from './routes/categoryRoutes.js';
+import companyRoutes from './routes/companyRoutes.js';
+import orderRoutes from './routes/orderRoutes.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Connect to the database
+connectDB();
+
 app.use(express.json());
 
-// Pridėkite šį maršrutų naudojimą:
-app.use('/api', router); // '/api' - pagrindinis kelias
+// Route handlers
+app.use('/api/categories', categoryRoutes);
+app.use('/api/companies', companyRoutes);
+app.use('/api/orders', orderRoutes);
 
 app.listen(PORT, () => {
-    console.log(`Serveris veikia: http://localhost:${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });
