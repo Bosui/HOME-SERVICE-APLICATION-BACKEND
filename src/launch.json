@@ -4,8 +4,14 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Debug Server",
-            "skipFiles": ["<node_internals>/**"]
+            "name": "Paleisti programą",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/src/app.js", // Arba nurodykite savo serverio failo kelią
+            "env": {
+                "NODE_ENV": "development"
+            }
         }
     ]
 }
