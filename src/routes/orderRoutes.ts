@@ -1,7 +1,13 @@
-// routes/orderRoutes.js
+// src/routes/orderRoutes.ts
 
 import express from 'express';
-import { createOrder, deleteOrder, getAllOrders, getOrderById, updateOrder } from '../controllers/OrderController.js';
+import {
+    createOrder,
+    deleteOrder,
+    getAllOrders,
+    getOrderById,
+    updateOrder
+} from '../controllers/orderController';
 
 const router = express.Router();
 

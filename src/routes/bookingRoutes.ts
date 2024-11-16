@@ -1,6 +1,11 @@
-// routes/bookingRoutes.js
+// src/routes/bookingRoutes.ts
+
 import express from 'express';
-import { createBooking, deleteBooking, getBookingsByUserEmail } from '../controllers/BookingController.js';
+import {
+    createBooking,
+    deleteBooking,
+    getBookingsByUserEmail
+} from '../controllers/bookingController';
 
 const router = express.Router();
 

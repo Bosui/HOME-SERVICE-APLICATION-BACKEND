@@ -1,7 +1,13 @@
-// routes/companyRoutes.js
+// src/routes/companyRoutes.ts
 
 import express from 'express';
-import { createCompany, deleteCompany, getAllCompanies, getCompanyById, updateCompany } from '../controllers/CompanyController.js';
+import {
+    createCompany,
+    deleteCompany,
+    getAllCompanies,
+    getCompanyById,
+    updateCompany
+} from '../controllers/companyController';
 
 const router = express.Router();
 

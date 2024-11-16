@@ -1,9 +1,13 @@
-// controllers/OrderController.js
+// src/controllers/OrderController.ts
 
-import Order from '../models/Order.js'; // Įsitikinkite, kad turite sukurtą Order modelį
+import { Request, Response } from 'express';
+import Order from '../models/order'; // Įsitikinkite, kad turite sukurtą Order modelį
 
 // Gauti visus užsakymus
-export const getAllOrders = async (req, res) => {
+export const getAllOrders = async (
+    req: Request,
+    res: Response
+): Promise<void> => {
     try {
         const orders = await Order.find();
         res.status(200).json(orders);
@@ -13,7 +17,10 @@ export const getAllOrders = async (req, res) => {
 };
 
 // Sukurti naują užsakymą
-export const createOrder = async (req, res) => {
+export const createOrder = async (
+    req: Request,
+    res: Response
+): Promise<void> => {
     const { customerName, items, totalAmount, status } = req.body;
     try {
         const newOrder = new Order({ customerName, items, totalAmount, status });
@@ -25,11 +32,15 @@ export const createOrder = async (req, res) => {
 };
 
 // Gauti užsakymą pagal ID
-export const getOrderById = async (req, res) => {
+export const getOrderById = async (
+    req: Request<{ id: string }>,
+    res: Response
+): Promise<void> => {
     try {
         const order = await Order.findById(req.params.id);
         if (!order) {
-            return res.status(404).json({ message: 'Order not found' });
+            res.status(404).json({ message: 'Order not found' });
+            return;
         }
         res.status(200).json(order);
     } catch (error) {
@@ -38,11 +49,19 @@ export const getOrderById = async (req, res) => {
 };
 
 // Atnaujinti užsakymą pagal ID
-export const updateOrder = async (req, res) => {
+export const updateOrder = async (
+    req: Request<{ id: string }>,
+    res: Response
+): Promise<void> => {
     try {
-        const updatedOrder = await Order.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        const updatedOrder = await Order.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true }
+        );
         if (!updatedOrder) {
-            return res.status(404).json({ message: 'Order not found' });
+            res.status(404).json({ message: 'Order not found' });
+            return;
         }
         res.status(200).json(updatedOrder);
     } catch (error) {
@@ -51,11 +70,15 @@ export const updateOrder = async (req, res) => {
 };
 
 // Ištrinti užsakymą pagal ID
-export const deleteOrder = async (req, res) => {
+export const deleteOrder = async (
+    req: Request<{ id: string }>,
+    res: Response
+): Promise<void> => {
     try {
         const deletedOrder = await Order.findByIdAndDelete(req.params.id);
         if (!deletedOrder) {
-            return res.status(404).json({ message: 'Order not found' });
+            res.status(404).json({ message: 'Order not found' });
+            return;
         }
         res.status(200).json({ message: 'Order deleted successfully' });
     } catch (error) {

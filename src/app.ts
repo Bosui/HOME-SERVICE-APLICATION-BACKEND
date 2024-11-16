@@ -1,6 +1,7 @@
+// src/app.ts
 import cors from 'cors';
 import dotenv from 'dotenv';
-import express from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import mongoose from 'mongoose';
 import errorHandler from './middlewares/errorHandler.js';
 import authRoutes from './routes/authRoutes.js';
@@ -16,12 +17,13 @@ app.use(express.json());
 app.use(cors());
 
 // Prisijungimas prie MongoDB
-mongoose.connect(process.env.MONGO_URI)
+mongoose
+    .connect(process.env.MONGO_URI || '')
     .then(() => console.log('Prisijungta prie MongoDB'))
     .catch(err => console.error('Klaida jungiantis prie MongoDB:', err));
 
 // Užklausų sekimo middleware (debug'inimui)
-app.use((req, res, next) => {
+app.use((req: Request, res: Response, next: NextFunction) => {
     console.log(`Gauta užklausa: ${req.method} ${req.url}`);
     next();
 });
@@ -36,7 +38,7 @@ app.use('/api/bookings', bookingRoutes);
 app.use(errorHandler);
 
 // Serverio paleidimas
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 5000;
 app.listen(PORT, () => {
     console.log(`Serveris veikia adresu http://localhost:${PORT}`);
 });

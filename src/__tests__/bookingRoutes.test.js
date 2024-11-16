@@ -1,41 +1,104 @@
-// __tests__/bookingRoutes.test.js
+// __tests__/bookingRoutes.test.ts
+
+import mongoose from 'mongoose';
 import request from 'supertest';
-import app from '../app.js';
+import app from '../src/app'; // Importuokite savo Express aplikaciją
+import Booking from '../src/models/Booking'; // Jei naudojate Booking modelį
 
-jest.setTimeout(20000); // 20 sekundžių laiko limitas visiems testams šiame faile
-
-describe('Business Routes', () => {
-    it('should retrieve all businesses', async () => {
-        const response = await request(app).get('/api/businesses');
-        expect(response.status).toBe(200);
-        expect(Array.isArray(response.body)).toBe(true);
-    });
-    // Kiti testai...
-
-describe('Booking Routes', () => {
-    it('should retrieve bookings by user email', async () => {
-        const email = 'user@example.com';
-        const response = await request(app).get(`/api/bookings/user/${email}`);
-        expect(response.status).toBe(200);
-        expect(Array.isArray(response.body)).toBe(true);
-    });
-
-    it('should create a new booking', async () => {
-        const newBooking = {
-            businessId: '64b329a7d1f5a123456789ab', // Replace with an actual business ID
-            date: '2023-11-05',
-            customerName: 'John Doe',
-            service: 'Cleaning'
-        };
-        const response = await request(app).post('/api/bookings').send(newBooking);
-        expect(response.status).toBe(201);
-        expect(response.body).toHaveProperty('_id');
-    });
-
-    it('should delete a booking by ID', async () => {
-        const bookingId = '64b329a7d1f5a123456789cd'; // Replace with an actual booking ID
-        const response = await request(app).delete(`/api/bookings/${bookingId}`);
-        expect([200, 404]).toContain(response.status);
+// Prieš visus testus prisijungiame prie testavimo duomenų bazės
+beforeAll(async () => {
+    const mongoUri = 'mongodb://localhost:27017/testBookingRoutes';
+    await mongoose.connect(mongoUri, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
     });
 });
+
+// Po visų testų išvalome duomenis ir atsijungiame
+afterAll(async () => {
+    await mongoose.connection.dropDatabase();
+    await mongoose.connection.close();
+});
+
+// Prieš kiekvieną testą išvalome Booking kolekciją
+beforeEach(async () => {
+    await Booking.deleteMany({});
+});
+
+// Testas: Sukuria naują užsakymą
+describe('POST /api/bookings', () => {
+    it('turėtų sukurti naują užsakymą', async () => {
+        const newBooking = {
+            businessId: '60d0fe4f5311236168a109ca',
+            date: '2024-12-01T00:00:00.000Z',
+            customerName: 'Test User',
+            service: 'Test Service',
+        };
+
+        const response = await request(app)
+            .post('/api/bookings')
+            .send(newBooking);
+
+        expect(response.status).toBe(201);
+        expect(response.body).toHaveProperty('_id');
+        expect(response.body.customerName).toBe(newBooking.customerName);
     });
+
+    it('turėtų grąžinti klaidą, jei trūksta laukų', async () => {
+        const incompleteBooking = {
+            date: '2024-12-01T00:00:00.000Z',
+            customerName: 'Test User',
+        };
+
+        const response = await request(app)
+            .post('/api/bookings')
+            .send(incompleteBooking);
+
+        expect(response.status).toBe(400);
+        expect(response.body).toHaveProperty('message', 'Trūksta būtino lauko');
+    });
+});
+
+// Testas: Gauti užsakymus pagal vartotojo el. pašto adresą
+describe('GET /api/bookings/user/:email', () => {
+    it('turėtų grąžinti užsakymus pagal vartotojo el. paštą', async () => {
+        const booking1 = await Booking.create({
+            businessId: '60d0fe4f5311236168a109ca',
+            date: '2024-12-01T00:00:00.000Z',
+            customerName: 'user@test.com',
+            service: 'Test Service 1',
+        });
+
+        const response = await request(app).get('/api/bookings/user/user@test.com');
+
+        expect(response.status).toBe(200);
+        expect(response.body).toHaveLength(1);
+        expect(response.body[0]._id).toBe(booking1._id.toString());
+    });
+});
+
+// Testas: Ištrinti užsakymą pagal ID
+describe('DELETE /api/bookings/:id', () => {
+    it('turėtų ištrinti užsakymą pagal ID', async () => {
+        const booking = await Booking.create({
+            businessId: '60d0fe4f5311236168a109ca',
+            date: '2024-12-01T00:00:00.000Z',
+            customerName: 'Test User',
+            service: 'Test Service',
+        });
+
+        const response = await request(app).delete(`/api/bookings/${booking._id}`);
+
+        expect(response.status).toBe(200);
+        expect(response.body).toHaveProperty('message', 'Užsakymas sėkmingai ištrintas');
+    });
+
+    it('turėtų grąžinti klaidą, jei užsakymas nerastas', async () => {
+        const invalidId = '60d0fe4f5311236168a109cb';
+
+        const response = await request(app).delete(`/api/bookings/${invalidId}`);
+
+        expect(response.status).toBe(404);
+        expect(response.body).toHaveProperty('message', 'Užsakymas nerastas');
+    });
+});

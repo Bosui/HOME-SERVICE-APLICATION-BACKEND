@@ -1,8 +1,13 @@
-// controllers/CategoryController.js
+// src/controllers/CategoryController.ts
 
-import Category from '../models/Category.js';
+import { NextFunction, Request, Response } from 'express';
+import Category from '../models/category';
 
-export const getAllCategories = async (req, res) => {
+// Gauna visas kategorijas
+export const getAllCategories = async (
+    req: Request,
+    res: Response
+): Promise<void> => {
     try {
         const categories = await Category.find();
         res.status(200).json(categories);
@@ -11,28 +16,38 @@ export const getAllCategories = async (req, res) => {
     }
 };
 
-export const createCategory = async (req, res, next) => {
+// Sukuria naują kategoriją
+export const createCategory = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
     try {
         const { name, backgroundColor, iconUrl } = req.body;
         if (!name || !backgroundColor || !iconUrl) {
-            return res.status(400).json({ message: 'Trūksta būtino lauko' });
+            res.status(400).json({ message: 'Trūksta būtino lauko' });
+            return;
         }
         const newCategory = new Category({ name, backgroundColor, iconUrl });
         await newCategory.save();
         res.status(201).json(newCategory);
     } catch (error) {
-        console.error('Klaida kuriant kategoriją:', error.message);
-        next(error); 
+        console.error('Klaida kuriant kategoriją:', (error as Error).message);
+        next(error);
     }
 };
 
-
-export const updateCategory = async (req, res) => {
+// Atnaujina kategoriją pagal ID
+export const updateCategory = async (
+    req: Request<{ id: string }>,
+    res: Response
+): Promise<void> => {
     try {
         const { id } = req.params;
         const updatedCategory = await Category.findByIdAndUpdate(id, req.body, { new: true });
         if (!updatedCategory) {
-            return res.status(404).json({ message: 'Category not found' });
+            res.status(404).json({ message: 'Category not found' });
+            return;
         }
         res.status(200).json(updatedCategory);
     } catch (error) {
@@ -40,12 +55,17 @@ export const updateCategory = async (req, res) => {
     }
 };
 
-export const getCategoryById = async (req, res) => {
+// Gauna kategoriją pagal ID
+export const getCategoryById = async (
+    req: Request<{ id: string }>,
+    res: Response
+): Promise<void> => {
     try {
         const { id } = req.params;
         const category = await Category.findById(id);
         if (!category) {
-            return res.status(404).json({ message: 'Category not found' });
+            res.status(404).json({ message: 'Category not found' });
+            return;
         }
         res.status(200).json(category);
     } catch (error) {
